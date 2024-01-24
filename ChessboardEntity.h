@@ -9,8 +9,7 @@ class ChessboardEntity : public sf::Drawable, public sf::Transformable  {
 public:
 	ChessboardEntity(GameMode* grid, sf::RenderWindow* window);
 
-	void pickUpPieceAtWorldCoords(sf::Vector2f coords);
-	void putPieceAtWorldCoords(sf::Vector2f coords);
+	void interactAtWorldCoords(sf::Vector2f coords);
 private:
 	void loadSprites();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

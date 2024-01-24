@@ -53,6 +53,17 @@ void ChessboardEntity::draw(sf::RenderTarget& target, sf::RenderStates states) c
         }
     }
 
+    // Отрисовка возможных ходов
+    sf::CircleShape circle(50.f);
+    circle.setOrigin(50.f, 50.f);
+    circle.setFillColor(sf::Color(100, 250, 50, 100));
+    auto movesPoints = gameMode->getAllPossibleMovesForPickedUpPiece();
+    for (const Point& point : movesPoints) {
+        circle.setPosition({ (float)(point.col + 0.5) * chessSquareResolution, (float)(point.row + 0.5) * chessSquareResolution });
+        target.draw(circle);
+    }
+
+
     // Отрисовка поднятой фигуры
     const Piece* pickedUpPiece = gameMode->getPickedUpPiece();
     if (!pickedUpPiece) {
@@ -68,14 +79,11 @@ void ChessboardEntity::draw(sf::RenderTarget& target, sf::RenderStates states) c
 
     sprite.setPosition(worldMousePos.x - chessSquareResolution / 2, worldMousePos.y - chessSquareResolution / 2);
     target.draw(sprite, states);
+
+    
 }
 
-void ChessboardEntity::pickUpPieceAtWorldCoords(sf::Vector2f coords) {
+void ChessboardEntity::interactAtWorldCoords(sf::Vector2f coords) {
     Point pieceCoords(coords.y / chessSquareResolution, coords.x / chessSquareResolution);
-    gameMode->pickUpPiece(pieceCoords);   
-}
-
-void ChessboardEntity::putPieceAtWorldCoords(sf::Vector2f coords) {
-    Point pieceCoords(coords.y / chessSquareResolution, coords.x / chessSquareResolution);
-    gameMode->putPiece(pieceCoords);
+    gameMode->squareInteraction(pieceCoords);
 }

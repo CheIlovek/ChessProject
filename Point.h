@@ -8,12 +8,12 @@ struct Point {
 	Point(const short row, const short col) : row(row), col(col) {};
 	Point(const Point& other) : row(other.row), col(other.col) {};
 
-	void moveTo(const short rowShift, const short colShift)  {
+	void move(const short rowShift, const short colShift)  {
 		row += rowShift;
 		col += colShift;
 	}
 
-	Point getMovedTo(const short rowShift, const short colShift) {
+	Point getMoved(const short rowShift, const short colShift) {
 		return Point(row + rowShift, col + colShift);
 	}
 
@@ -23,5 +23,9 @@ struct Point {
 
 	bool operator==(const Point& other) const {
 		return row == other.row && col == other.col;
+	}
+
+	bool operator!=(const Point& other) const {
+		return !(*this == other) ;
 	}
 };

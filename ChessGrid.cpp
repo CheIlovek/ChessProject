@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ChessGrid.h"
 #include "GameMode.h"
 
@@ -67,7 +68,7 @@ Piece* ChessGrid::getOrDefault(int index, Piece* defaultValue) {
 
 Piece* ChessGrid::getOrDefault(Point point, Piece* defaultValue) {
 	int index = point.row * 8 + point.col;
-	if (index < 0 && index >= chessGrid.size()) {
+	if (index < 0 || index >= chessGrid.size()) {
 		return defaultValue;
 	}
 	return (*this)[index];
@@ -75,7 +76,7 @@ Piece* ChessGrid::getOrDefault(Point point, Piece* defaultValue) {
 
 Piece* ChessGrid::getOrDefault(sf::Vector2i point, Piece* defaultValue) {
 	int index = point.y * 8 + point.x;
-	if (index < 0 && index >= chessGrid.size()) {
+	if (index < 0 || index >= chessGrid.size()) {
 		return defaultValue;
 	}
 	return (*this)[index];

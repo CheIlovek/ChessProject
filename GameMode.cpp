@@ -1,11 +1,27 @@
+#include <iostream>
 #include "GameMode.h"
-
 
 GameMode::GameMode() : grid(){
 }
 
 ChessGrid* GameMode::getGrid() {
 	return &grid;
+}
+
+void GameMode::squareInteraction(Point gridCoords) {
+
+	// Вернуть фигуру на место
+	if (gridCoords == pickedUpPiece.piecePreviousPosition) {
+		grid[gridCoords] = pickedUpPiece.clear();
+		return;
+	}
+
+	
+	if (!pickedUpPiece.piece) { // Если фигура не взята - попытаться взять с этого квадрата
+		pickUpPiece(gridCoords);
+	} else {					// Иначе - поставить фигуру на это место.
+		putPiece(gridCoords);
+	}
 }
 
 void GameMode::resetBoard() {
@@ -16,16 +32,20 @@ void GameMode::resetBoard() {
 
 bool GameMode::putPiece(Point gridCoords) {
 	// Ни одна фигура не была поднята - нечем ходить
-	if (!pickedUpPiece) {
+	if (!pickedUpPiece.piece) {
 		return false;
 	}
+	// Вернуть обратно
+
+
 	// Ход нелегален
-	if (std::find(pickedUpPieceAvailableMoves.begin(), pickedUpPieceAvailableMoves.end(), gridCoords) == pickedUpPieceAvailableMoves.end()) {
+	std::vector<Point>& availableMoves = pickedUpPiece.pieceAvailableMoves;
+	if (std::find(availableMoves.begin(), availableMoves.end(), gridCoords) == availableMoves.end()) {
 		return false;
 	}
 	// TODO
 	delete grid[gridCoords];
-	grid[gridCoords] = pickedUpPiece.release();
+	grid[gridCoords] = pickedUpPiece.clear();
 
 	// Проверка мат ли это, или шах
 	teamToMove = teamToMove == Teams::WHITE ? Teams::BLACK : Teams::WHITE;
@@ -36,17 +56,19 @@ bool GameMode::putPiece(Point gridCoords) {
 			state = GameStates::CHECKMATE;
 		}
 	}
+	return true;
 }
 
 void GameMode::pickUpPiece(Point gridCoords) {
-	// Если уже поднят - нужно ставить назад (А НАЗАД ЭТО КУДАА??!?!?!??!?!??!)
-	if (pickedUpPiece) return;
+	if (pickedUpPiece.piece) return;
 
 
 	Piece* piece = grid.getOrDefault(gridCoords,nullptr);
 	if (piece == nullptr) return;
 
 	if (piece->team != teamToMove) return;
+
+	std::vector<Point> pickedUpPieceAvailableMoves;
 
 	switch (piece->type) {
 	case PiecesTypes::BISHOP:
@@ -68,13 +90,16 @@ void GameMode::pickUpPiece(Point gridCoords) {
 		pickedUpPieceAvailableMoves = getAllPossibleMovesRook(gridCoords);
 		break;
 	}
-	
-	pickedUpPiece.reset(piece);
+	pickedUpPiece.init(piece, pickedUpPieceAvailableMoves, gridCoords);
 	grid[gridCoords] = nullptr;
 }
 
 const Piece* GameMode::getPickedUpPiece() {
-	return pickedUpPiece.get();
+	return pickedUpPiece.piece.get();
+}
+
+const std::vector<Point> GameMode::getAllPossibleMovesForPickedUpPiece() const {
+	return pickedUpPiece.pieceAvailableMoves;
 }
 
 
@@ -82,7 +107,7 @@ std::vector<Point> GameMode::getAllPossibleMovesPawn(Point position) {
 	std::vector<Point> possibleMoves;
 	Teams team = grid[position]->team;
 	short direction = team == Teams::WHITE ? -1 : 1; // Белые идут "вверх", чёрные "вниз"
-	Point moveToTest = position.getMovedTo(direction, 0);
+	Point moveToTest = position.getMoved(direction, 0);
 	Piece defaultPiece(PiecesTypes::KING, team);	// В данном случае не важно его значение, 
 													// нужен чтоб получить nullptr только если клетка существует и пуста.
 	
@@ -93,7 +118,7 @@ std::vector<Point> GameMode::getAllPossibleMovesPawn(Point position) {
 		// Если первый ход пешки - проверка хода на две клетки вперёд
 		if (startRowForBlackPawns == position.row && team == Teams::BLACK ||
 			startRowForWhitePawns == position.row && team == Teams::WHITE) {
-			moveToTest.moveTo(direction, 0);
+			moveToTest.move(direction, 0);
 			if (grid.getOrDefault(moveToTest, &defaultPiece) == nullptr) {
 				possibleMoves.push_back(moveToTest);
 			}
@@ -103,14 +128,14 @@ std::vector<Point> GameMode::getAllPossibleMovesPawn(Point position) {
 
 
 	// Можно ли съесть фигуру спереди-справа?
-	moveToTest = position.getMovedTo(direction, 1);
+	moveToTest = position.getMoved(direction, 1);
 	Piece* piece = grid.getOrDefault(moveToTest, nullptr);
 	if (piece && piece->team != team) {
 		possibleMoves.push_back(moveToTest);
 	}
 
 	// Можно ли съесть фигуру спереди-слева?
-	moveToTest = position.getMovedTo(direction, -1);
+	moveToTest = position.getMoved(direction, -1);
 	piece = grid.getOrDefault(moveToTest, nullptr);
 	if (piece && piece->team != team) {
 		possibleMoves.push_back(moveToTest);
@@ -125,11 +150,11 @@ std::vector<Point> GameMode::getAllPossibleMovesKnight(Point position) {
 
 	for (int i = -1; i <= 1; i += 2) {
 		for (int j = -2; j <= 2; j += 4) {
-			Point moveToTest = position.getMovedTo(i, j);
+			Point moveToTest = position.getMoved(i, j);
 			if (isCorrectMove(moveToTest, team)) {
 				possibleMoves.push_back(moveToTest);
 			}
-			moveToTest = position.getMovedTo(j, i);
+			moveToTest = position.getMoved(j, i);
 			if (isCorrectMove(moveToTest, team)) {
 				possibleMoves.push_back(moveToTest);
 			}
@@ -145,13 +170,13 @@ std::vector<Point> GameMode::getAllPossibleMovesBishop(Point position) {
 
 	for (int i = -1; i <= 1; i += 2) {
 		for (int j = -1; j <= 1; j += 2) {
-			Point moveToTest = position.getMovedTo(i, j);
+			Point moveToTest = position.getMoved(i, j);
 			while (isCorrectMove(moveToTest, team)) {
 				possibleMoves.push_back(moveToTest);
-				if (!grid[moveToTest]) { // Если на клетке стоит вражеская фигура (союзная не может стоять так как сработал isCorrectMove)
+				if (grid[moveToTest]) { // Если на клетке стоит вражеская фигура (союзная не может стоять так как сработал isCorrectMove)
 					break;
 				}
-				moveToTest.moveTo(i, j);
+				moveToTest.move(i, j);
 			}
 		}
 	}
@@ -163,21 +188,21 @@ std::vector<Point> GameMode::getAllPossibleMovesRook(Point position) {
 	Teams team = grid[position]->team;
 
 	for (int i = -1; i <= 1; i += 2) {
-		Point moveToTest = position.getMovedTo(i, 0);
+		Point moveToTest = position.getMoved(i, 0);
 		while (isCorrectMove(moveToTest, team)) {
 			possibleMoves.push_back(moveToTest);
-			if (!grid[moveToTest]) { // Если на клетке стоит вражеская фигура (союзная не может стоять так как сработал isCorrectMove
+			if (grid[moveToTest]) { // Если на клетке стоит вражеская фигура (союзная не может стоять так как сработал isCorrectMove
 				break;
 			}
-			moveToTest.moveTo(i, 0);
+			moveToTest.move(i, 0);
 		}
-		moveToTest = position.getMovedTo(0, i);
+		moveToTest = position.getMoved(0, i);
 		while (isCorrectMove(moveToTest, team)) {
 			possibleMoves.push_back(moveToTest);
-			if (!grid[moveToTest]) { // Если на клетке стоит вражеская фигура (союзная не может стоять так как сработал isCorrectMove
+			if (grid[moveToTest]) { // Если на клетке стоит вражеская фигура (союзная не может стоять так как сработал isCorrectMove
 				break;
 			}
-			moveToTest.moveTo(0, i);
+			moveToTest.move(0, i);
 		}
 	}
 	
@@ -200,7 +225,7 @@ std::vector<Point> GameMode::getAllPossibleMovesKing(Point position) {
 
 	for (int i = -1; i <= 1; i++) {
 		for (int j = -1; j <= 1; j ++) {
-			Point moveToTest = position.getMovedTo(i, j);
+			Point moveToTest = position.getMoved(i, j);
 			if (isCorrectMove(moveToTest, team)) {
 				possibleMoves.push_back(moveToTest);
 			}
@@ -210,17 +235,16 @@ std::vector<Point> GameMode::getAllPossibleMovesKing(Point position) {
 	return possibleMoves;
 }
 
-bool GameMode::isCorrectMove(const Point& position, Teams team) {
+bool GameMode::isCorrectMove(const Point position, Teams team) {
 
 	// Устанвливаем defaultValue той же команды, чтобы дальнейшая проверка провалилась при его возвращении
 	// (Не очень интуитивно, но эффективно) TODO
-	// P.S Тип KING - не важен
+	// P.S Тип PAWN - не важен
 
 	// TODO БАг если двигать пешки перед королём
-
-	Piece defaultPiece(PiecesTypes::KING, team);
+	Piece defaultPiece(PiecesTypes::PAWN, team);
 	Piece* piece = grid.getOrDefault(position, &defaultPiece);
-	return !piece || piece->team != team;
+	return piece == nullptr || piece->team != team;
 }
 
 bool GameMode::isKingUnderAttack(Teams team) {
@@ -264,12 +288,12 @@ bool GameMode::isKingUnderAttack(Teams team) {
 	}
 	// Атакован пешкой?
 	int direction = team == Teams::WHITE ? -1 : 1;
-	Point pawnLocation = kingLocation.getMovedTo(direction, 1);
+	Point pawnLocation = kingLocation.getMoved(direction, 1);
 	Piece* pawn = grid.getOrDefault(pawnLocation, nullptr);
 	if (pawn && pawn->type != PiecesTypes::PAWN && pawn->team != team) {
 		return true;
 	}
-	pawnLocation = kingLocation.getMovedTo(direction, -1);
+	pawnLocation = kingLocation.getMoved(direction, -1);
 	pawn = grid.getOrDefault(pawnLocation, nullptr);
 	if (pawn && pawn->type != PiecesTypes::PAWN && pawn->team != team) {
 		return true;
@@ -285,7 +309,6 @@ bool GameMode::haveAvailableMoves(Teams team) {
 void GameMode::placeTeamPieces(const Teams team, const short row, const short direction) {
 
 	short startPos = row * 8;
-	// ХММ, как это сделать правильно
 	grid[startPos + 0] = new Piece(PiecesTypes::ROOK,	team);
 	grid[startPos + 7] = new Piece(PiecesTypes::ROOK,	team);
 	grid[startPos + 1] = new Piece(PiecesTypes::KNIGHT, team);

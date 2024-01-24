@@ -10,14 +10,17 @@ public:
 	GameMode();
 	ChessGrid* getGrid();
 	
-
+	void squareInteraction(Point gridCoords);
 	void resetBoard(); // Расставить всё как надоо
 	bool putPiece	(Point gridCoords);
 	void pickUpPiece(Point gridCoords);
 	const Piece* getPickedUpPiece();
-	std::vector<short> getAllPossibleMoves(short pieceId);
+	const std::vector<Point> getAllPossibleMovesForPickedUpPiece() const;
 	
 private:
+
+	
+
 	std::vector<Point> getAllPossibleMovesPawn		(Point position);
 	std::vector<Point> getAllPossibleMovesKnight	(Point position);
 	std::vector<Point> getAllPossibleMovesBishop	(Point position);
@@ -27,7 +30,7 @@ private:
 
 	// Возможно ли поставить фигуру команды team на position? 
 	// Не учитывает изначального положения фигуры.
-	bool isCorrectMove(const Point& position, Teams team);
+	bool isCorrectMove(const Point position, Teams team);
 
 	// Находится ли король под шахом?
 	bool isKingUnderAttack	(Teams team);
@@ -39,6 +42,28 @@ private:
 	void placeTeamPieces(const Teams team, const short row, const short direction);
 
 
+	struct PickedUpPiece {
+		std::unique_ptr<Piece> piece;
+		std::vector<Point> pieceAvailableMoves;
+		Point piecePreviousPosition;
+
+		PickedUpPiece() : piecePreviousPosition(-1,-1) {};
+
+		// Возвращает указатель на Piece, который необходимо обработать
+		Piece* clear() {
+			pieceAvailableMoves.clear();
+			piecePreviousPosition = Point(-1, -1);
+			return piece.release();
+		}
+
+		void init(Piece* piece, std::vector<Point> availableMoves, Point position) {
+			pieceAvailableMoves = availableMoves;
+			piecePreviousPosition = position;
+			this->piece.reset(piece);
+		}
+
+	};
+
 	// Шахматная доска
 	ChessGrid grid;
 
@@ -47,11 +72,12 @@ private:
 	std::unique_ptr<Point> enPassantPawn;
 	Teams teamToMove = Teams::WHITE;
 	GameStates state = GameStates::FREEPLAY;
-	std::unique_ptr<Piece> pickedUpPiece;
-	std::vector<Point> pickedUpPieceAvailableMoves;
+	PickedUpPiece pickedUpPiece;
 
 	const short startRowForWhitePawns = 6;
 	const short startRowForBlackPawns = 1;
+
+	
 
 };
 
@@ -62,7 +88,12 @@ struct Piece {
 	Piece(const PiecesTypes type, const Teams team)
 		: type(type), team(team) {
 	}
+	Piece(Piece& piece) : type(piece.type), team(piece.team) {
+	}
 };
+
+
+
 
 
 

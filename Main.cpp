@@ -1,13 +1,26 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include "spdlog/async.h" 
+#include "spdlog/spdlog.h" 
+
 #include "ChessGrid.h"
 #include "ChessboardEntity.h"
 #include "Point.h"
 int main() {
+    spdlog::info("Welcome!");
     sf::RenderWindow window(sf::VideoMode(500,500), "SFML works!");
     sf::View view(sf::FloatRect(0, 0, 2048, 2048));
     window.setView(view);
     window.setVerticalSyncEnabled(true);
+    //// Настройка логгера
+    //auto async_logger = 
+    //    std::make_shared<
+    //        spdlog::async_factory_impl<spdlog::async_overflow_policy::block>>()
+    //    ;
+    //async_logger->set_level(spdlog::level::level_enum::trace);
+    //spdlog::set_default_logger(async_logger);
+    spdlog::set_level(spdlog::level::level_enum::trace);
+
 
     GameMode gameMode;
     ChessboardEntity chessBoardEntity(&gameMode, &window);
@@ -22,14 +35,8 @@ int main() {
                 break;
             case sf::Event::MouseButtonPressed:
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    std::cout << sf::Mouse::getPosition(window).x << " " << sf::Mouse::getPosition(window).y << '\n';
                     sf::Vector2f worldPos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-                    std::cout << worldPos.x << " " << worldPos.y << '\n' << '\n';
-                    chessBoardEntity.pickUpPieceAtWorldCoords(worldPos);
-                }
-                if (event.mouseButton.button == sf::Mouse::Right) {
-                    sf::Vector2f worldPos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-                    chessBoardEntity.putPieceAtWorldCoords(worldPos);
+                    chessBoardEntity.interactAtWorldCoords(worldPos);
                 }
                 break;
             }
@@ -39,6 +46,8 @@ int main() {
         window.draw(chessBoardEntity);
         window.display();
     }
+
+    spdlog::shutdown();
 
     return 0;
 }
