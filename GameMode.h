@@ -12,7 +12,7 @@ public:
 	
 	void squareInteraction(Point gridCoords);
 	void resetBoard(); // Расставить всё как надоо
-	bool putPiece	(Point gridCoords);
+	bool makeMove	(Point gridCoords);
 	void pickUpPiece(Point gridCoords);
 	const Piece* getPickedUpPiece();
 	const std::vector<Point> getAllPossibleMovesForPickedUpPiece() const;
@@ -81,16 +81,6 @@ private:
 
 };
 
-struct Piece {
-	PiecesTypes type;
-	Teams team;
-
-	Piece(const PiecesTypes type, const Teams team)
-		: type(type), team(team) {
-	}
-	Piece(Piece& piece) : type(piece.type), team(piece.team) {
-	}
-};
 
 
 

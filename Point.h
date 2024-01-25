@@ -28,4 +28,9 @@ struct Point {
 	bool operator!=(const Point& other) const {
 		return !(*this == other) ;
 	}
+
+	std::ostream& operator<<(std::ostream& os) {
+		os << "(" << this->row << ", " << this->col << ")";
+		return os;
+	}
 };

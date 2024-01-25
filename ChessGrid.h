@@ -4,9 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include "ChessEnums.h"
 #include "Point.h"
+#include "Piece.h"
 
-
-struct Piece;
 // TODO: Заменить на юник птр-ы
 // Класс шахматной доски.
 class ChessGrid {

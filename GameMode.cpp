@@ -1,5 +1,7 @@
 #include <iostream>
 #include "GameMode.h"
+#include "Piece.h"
+#include "spdlog/spdlog.h" 
 
 GameMode::GameMode() : grid(){
 }
@@ -13,6 +15,7 @@ void GameMode::squareInteraction(Point gridCoords) {
 	// Вернуть фигуру на место
 	if (gridCoords == pickedUpPiece.piecePreviousPosition) {
 		grid[gridCoords] = pickedUpPiece.clear();
+		spdlog::info("Figure is placed back");
 		return;
 	}
 
@@ -20,7 +23,7 @@ void GameMode::squareInteraction(Point gridCoords) {
 	if (!pickedUpPiece.piece) { // Если фигура не взята - попытаться взять с этого квадрата
 		pickUpPiece(gridCoords);
 	} else {					// Иначе - поставить фигуру на это место.
-		putPiece(gridCoords);
+		makeMove(gridCoords);
 	}
 }
 
@@ -28,45 +31,65 @@ void GameMode::resetBoard() {
 	grid.clear();
 	placeTeamPieces(Teams::WHITE, 7, -1);
 	placeTeamPieces(Teams::BLACK, 0, 1);
+
+	spdlog::info("Board is reseted");
 }
 
-bool GameMode::putPiece(Point gridCoords) {
-	// Ни одна фигура не была поднята - нечем ходить
-	if (!pickedUpPiece.piece) {
-		return false;
-	}
-	// Вернуть обратно
-
+bool GameMode::makeMove(Point gridCoords) {
 
 	// Ход нелегален
 	std::vector<Point>& availableMoves = pickedUpPiece.pieceAvailableMoves;
 	if (std::find(availableMoves.begin(), availableMoves.end(), gridCoords) == availableMoves.end()) {
+		spdlog::debug("Tried to make illegal move");
 		return false;
 	}
-	// TODO
+
+	// Если это взятие на проходе - то нужно удалять фигуру enPassantPawn
+	short direction = pickedUpPiece.piece->team == Teams::WHITE ? -1 : 1;
+	if (enPassantPawn && pickedUpPiece.piece->type == PiecesTypes::PAWN && gridCoords.col == enPassantPawn->col && enPassantPawn->row + direction == gridCoords.row) {
+		delete grid[*enPassantPawn];
+		grid[*enPassantPawn] = nullptr;
+	}
+
+
+	// Ход пешкой на 2 вперёд
+	if (pickedUpPiece.piece->type == PiecesTypes::PAWN && std::abs(pickedUpPiece.piecePreviousPosition.row - gridCoords.row) == 2) {
+		enPassantPawn.reset(new Point(gridCoords));
+	} else {
+		enPassantPawn.reset();
+	}
+
+
 	delete grid[gridCoords];
 	grid[gridCoords] = pickedUpPiece.clear();
+	spdlog::info("Piece is placed");
 
 	// Проверка мат ли это, или шах
 	teamToMove = teamToMove == Teams::WHITE ? Teams::BLACK : Teams::WHITE;
 	if (isKingUnderAttack(teamToMove)) {
 		if (haveAvailableMoves(teamToMove)) {
 			state = GameStates::CHECK;
+			spdlog::info("CHECK on board!");
 		} else {
 			state = GameStates::CHECKMATE;
+			spdlog::info("CHECKMATE on board!");
 		}
 	}
 	return true;
 }
 
 void GameMode::pickUpPiece(Point gridCoords) {
-	if (pickedUpPiece.piece) return;
-
-
 	Piece* piece = grid.getOrDefault(gridCoords,nullptr);
-	if (piece == nullptr) return;
+	if (piece == nullptr) {
+		spdlog::debug("Tried to pick up empty square");
+		return;
+	}
 
-	if (piece->team != teamToMove) return;
+	if (piece->team != teamToMove) {
+		//TODO
+		spdlog::debug("Tried to make move before HIS turn");
+		return;
+	}
 
 	std::vector<Point> pickedUpPieceAvailableMoves;
 
@@ -92,6 +115,7 @@ void GameMode::pickUpPiece(Point gridCoords) {
 	}
 	pickedUpPiece.init(piece, pickedUpPieceAvailableMoves, gridCoords);
 	grid[gridCoords] = nullptr;
+	spdlog::info("Piece picked up");
 }
 
 const Piece* GameMode::getPickedUpPiece() {
@@ -125,6 +149,9 @@ std::vector<Point> GameMode::getAllPossibleMovesPawn(Point position) {
 		}
 	}
 	// TODO : Проверка на ВЗЯТИЕ НА ПРОХОДЕ
+	if (enPassantPawn && enPassantPawn->row == position.row && std::abs(enPassantPawn->col - position.col) == 1) {
+		possibleMoves.push_back(enPassantPawn->getMoved(direction, 0));
+	}
 
 
 	// Можно ли съесть фигуру спереди-справа?
@@ -303,7 +330,10 @@ bool GameMode::isKingUnderAttack(Teams team) {
 }
 
 bool GameMode::haveAvailableMoves(Teams team) {
-	return false;
+	//TODO когда получаю availableMoves нужно делать проверку, что если фигуры нет на её прошлом месте то Король не под атакой
+	// НО исколючение это пешки с их взятием на проходе, там фигура меняется дважды
+	// БЛЛЛЛ но фигура может отойти так, что всё ещё загараживает шах, но уже стоит на другом месте ептааааааааа
+	return true;
 }
 
 void GameMode::placeTeamPieces(const Teams team, const short row, const short direction) {
