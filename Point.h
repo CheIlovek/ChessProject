@@ -1,7 +1,8 @@
 #pragma once
+
+
 // Координата для ориентирования на шахматной доске.
 struct Point {
-
 	short row;
 	short col;
 
@@ -29,8 +30,13 @@ struct Point {
 		return !(*this == other) ;
 	}
 
-	std::ostream& operator<<(std::ostream& os) {
-		os << "(" << this->row << ", " << this->col << ")";
-		return os;
+	friend std::ostream& operator<<(std::ostream& os, const Point& c) {
+		return os << "(" << c.row << ", " << c.col << ")";
 	}
 };
+
+
+
+
+
+

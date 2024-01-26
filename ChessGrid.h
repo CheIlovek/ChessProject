@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include <SFML/Graphics.hpp>
 #include "ChessEnums.h"
 #include "Point.h"
 #include "Piece.h"
@@ -10,8 +9,9 @@
 // Класс шахматной доски.
 class ChessGrid {
 public:
-	ChessGrid();
+	ChessGrid(unsigned int width, unsigned int height);
 	~ChessGrid();
+	ChessGrid(ChessGrid& other);
 	
 
 	auto begin() {
@@ -23,19 +23,31 @@ public:
 
 	void clear();
 	bool movePiece(short from, short to);
+	bool movePiece(Point from, Point to);
 
-	Piece*& operator[](int i);
-	Piece*& operator[](Point point);
-	Piece*& operator[](sf::Vector2i point);
+	void removePiece(Point point);
+	void removePiece(int row, int col);
+	void removePiece(int position);
+
+	void setPiece(Point point,		PiecesTypes type, Teams team);
+	void setPiece(int row, int col, PiecesTypes type, Teams team);
+	void setPiece(int position,		PiecesTypes type, Teams team);
+	void setPiece(Point point,		Piece* piece);
 
 	Point find(PiecesTypes type, Teams team);
 
+	Piece* operator[](int index);
+	Piece* operator[](Point point);
+
+
 	Piece* getOrDefault(int index,			Piece* defaultValue);
 	Piece* getOrDefault(Point point,		Piece* defaultValue);
-	Piece* getOrDefault(sf::Vector2i point, Piece* defaultValue);
 
 
 private:
-	std::vector<Piece*> chessGrid;
+	std::vector<std::unique_ptr<Piece>> chessGrid;
+
+	unsigned int width;
+	unsigned int height;
 };
 

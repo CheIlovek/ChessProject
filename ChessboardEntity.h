@@ -2,7 +2,6 @@
 #include <unordered_map>
 #include <SFML/Graphics.hpp>
 #include "GameMode.h"
-#include "Point.h"
 
 
 class ChessboardEntity : public sf::Drawable, public sf::Transformable  {

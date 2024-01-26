@@ -146,6 +146,7 @@
     <ClInclude Include="ChessGrid.h" />
     <ClInclude Include="ChessPiece.h" />
     <ClInclude Include="GameMode.h" />
+    <ClInclude Include="LogConversions.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="PieceEntity.h" />
     <ClInclude Include="Point.h" />

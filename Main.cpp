@@ -1,12 +1,26 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "spdlog/async.h" 
-#include "spdlog/spdlog.h" 
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h" // must be included
+
 
 #include "ChessGrid.h"
 #include "ChessboardEntity.h"
 #include "Point.h"
+
+
+
+
+
+
+
+
 int main() {
+    Point c(-1,-1);
+    //auto console = spdlog::stdout_logger_mt("console");
+    //console->info("custom class with operator<<: {}..", c);
+    spdlog::info(c);
     spdlog::info("Welcome!");
     sf::RenderWindow window(sf::VideoMode(500,500), "SFML works!");
     sf::View view(sf::FloatRect(0, 0, 2048, 2048));

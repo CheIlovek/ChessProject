@@ -20,23 +20,28 @@ public:
 private:
 
 	
+	//TODO Рокировка
 
-	std::vector<Point> getAllPossibleMovesPawn		(Point position);
-	std::vector<Point> getAllPossibleMovesKnight	(Point position);
-	std::vector<Point> getAllPossibleMovesBishop	(Point position);
-	std::vector<Point> getAllPossibleMovesRook		(Point position);
-	std::vector<Point> getAllPossibleMovesQueen		(Point position);
-	std::vector<Point> getAllPossibleMovesKing		(Point position);
+	std::vector<Point> getAllPossibleMovesPawn		(Point position, ChessGrid& gridToTest);
+	std::vector<Point> getAllPossibleMovesKnight	(Point position, ChessGrid& gridToTest);
+	std::vector<Point> getAllPossibleMovesBishop	(Point position, ChessGrid& gridToTest);
+	std::vector<Point> getAllPossibleMovesRook		(Point position, ChessGrid& gridToTest);
+	std::vector<Point> getAllPossibleMovesQueen		(Point position, ChessGrid& gridToTest);
+	std::vector<Point> getAllPossibleMovesKing		(Point position, ChessGrid& gridToTest);
 
-	// Возможно ли поставить фигуру команды team на position? 
-	// Не учитывает изначального положения фигуры.
-	bool isCorrectMove(const Point position, Teams team);
+	bool isMoveSafe(Teams team, Point prevPos, Point nextPos, ChessGrid& gridToTest);
+	bool couldThreatTheKingByMove(Teams team, Point piecePos, ChessGrid& gridToTest);
+
+	// Возможен ли ход. Оценивается по:
+	// 1. Не выходит за границы доски.
+	// 2. Не подставляет короля под атаку. (опционально)
+	bool isCorrectMove(const Point curPos, const Point nextPos, Teams team, ChessGrid& gridToTest, bool checkKingSafety = true);
 
 	// Находится ли король под шахом?
-	bool isKingUnderAttack	(Teams team);
+	bool isKingUnderAttack	(Teams team, ChessGrid& gridToTest);
 
 	// Может ли игрок совершить ход?
-	bool haveAvailableMoves	(Teams team);
+	bool haveAvailableMoves	(Teams team, ChessGrid& gridToTest);
 
 	// Базовая расстоновка фигур команды
 	void placeTeamPieces(const Teams team, const short row, const short direction);
@@ -59,13 +64,13 @@ private:
 		void init(Piece* piece, std::vector<Point> availableMoves, Point position) {
 			pieceAvailableMoves = availableMoves;
 			piecePreviousPosition = position;
-			this->piece.reset(piece);
+			this->piece.reset(new Piece(*piece));
 		}
 
 	};
 
 	// Шахматная доска
-	ChessGrid grid;
+	ChessGrid mainGrid;
 
 	// ID пешки которую можно взять по правилу "Взятие на проходе"
 	// Должно обнуляться на следующем ходу
