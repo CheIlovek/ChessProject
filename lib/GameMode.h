@@ -19,15 +19,10 @@ public:
 	
 private:
 
+	// Рокировка, первый ход пешки на 2 кл.
+	void checkForSpecialRules(Point piecePos, PiecesTypes type, ChessGrid& gridToTest);
 	
 	//TODO Рокировка
-
-	std::vector<Point> getAllPossibleMovesPawn		(Point position, ChessGrid& gridToTest);
-	std::vector<Point> getAllPossibleMovesKnight	(Point position, ChessGrid& gridToTest);
-	std::vector<Point> getAllPossibleMovesBishop	(Point position, ChessGrid& gridToTest);
-	std::vector<Point> getAllPossibleMovesRook		(Point position, ChessGrid& gridToTest);
-	std::vector<Point> getAllPossibleMovesQueen		(Point position, ChessGrid& gridToTest);
-	std::vector<Point> getAllPossibleMovesKing		(Point position, ChessGrid& gridToTest);
 
 	bool isMoveSafe(Teams team, Point prevPos, Point nextPos, ChessGrid& gridToTest);
 	bool couldThreatTheKingByMove(Teams team, Point piecePos, ChessGrid& gridToTest);
@@ -40,11 +35,13 @@ private:
 	// Находится ли король под шахом?
 	bool isKingUnderAttack	(Teams team, ChessGrid& gridToTest);
 
+	bool isSquareUnderAttack(Point square, Teams team, ChessGrid& gridToTest);
+
 	// Может ли игрок совершить ход?
 	bool haveAvailableMoves	(Teams team, ChessGrid& gridToTest);
 
 	// Базовая расстоновка фигур команды
-	void placeTeamPieces(const Teams team, const short row, const short direction);
+	void placeTeamPieces(const Teams team, short row, short direction);
 
 
 	struct PickedUpPiece {
@@ -64,7 +61,7 @@ private:
 		void init(Piece* piece, std::vector<Point> availableMoves, Point position) {
 			pieceAvailableMoves = availableMoves;
 			piecePreviousPosition = position;
-			this->piece.reset(new Piece(*piece));
+			this->piece.reset(piece);
 		}
 
 	};

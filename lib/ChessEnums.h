@@ -1,19 +1,21 @@
 #pragma once
 
 enum Teams {
-	NEUTRAL,
+	ENEMY_TO_ALL,
 	WHITE,
 	BLACK,
 };
 
+
+// NONE должен оставаться последним!!
 enum PiecesTypes {
-	NONE,
 	KING,
 	QUEEN,
 	ROOK,
 	BISHOP,
 	KNIGHT,
 	PAWN,
+	NONE,
 };
 
 enum GameStates {

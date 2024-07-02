@@ -4,6 +4,7 @@
 #include "GameMode.h"
 
 
+
 class ChessboardEntity : public sf::Drawable, public sf::Transformable  {
 public:
 	ChessboardEntity(GameMode* grid, sf::RenderWindow* window);

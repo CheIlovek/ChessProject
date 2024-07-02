@@ -1,4 +1,5 @@
 #include "ChessboardEntity.h"
+#include "Piece.h"
 
 ChessboardEntity::ChessboardEntity(GameMode* grid, sf::RenderWindow* window)
     : gameMode(grid), window(window) {

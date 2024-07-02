@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\Soft\SDKs\spdlog\compiled\include;D:\Soft\SDKs\SFML-2.6.1\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,6 +123,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\Soft\SDKs\spdlog\compiled\include;D:\Soft\SDKs\SFML-2.6.1\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,20 +137,16 @@
   <ItemGroup>
     <ClCompile Include="ChessboardEntity.cpp" />
     <ClCompile Include="ChessGrid.cpp" />
-    <ClCompile Include="ChessPiece.cpp" />
     <ClCompile Include="GameMode.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="PieceEntity.cpp" />
+    <ClCompile Include="Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChessboardEntity.h" />
     <ClInclude Include="ChessEnums.h" />
     <ClInclude Include="ChessGrid.h" />
-    <ClInclude Include="ChessPiece.h" />
     <ClInclude Include="GameMode.h" />
-    <ClInclude Include="LogConversions.h" />
     <ClInclude Include="Piece.h" />
-    <ClInclude Include="PieceEntity.h" />
     <ClInclude Include="Point.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

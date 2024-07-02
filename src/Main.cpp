@@ -4,10 +4,7 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h" // must be included
 
-
-#include "ChessGrid.h"
 #include "ChessboardEntity.h"
-#include "Point.h"
 
 
 

@@ -5,6 +5,7 @@
 #include "Point.h"
 #include "Piece.h"
 
+
 // TODO: Заменить на юник птр-ы
 // Класс шахматной доски.
 class ChessGrid {
@@ -25,23 +26,28 @@ public:
 	bool movePiece(short from, short to);
 	bool movePiece(Point from, Point to);
 
+	Teams getTeamOnSquareOrDefault(Point point, Teams defaultTeam);
+	Teams getTeamOnSquare(Point point);
+
 	void removePiece(Point point);
 	void removePiece(int row, int col);
 	void removePiece(int position);
 
-	void setPiece(Point point,		PiecesTypes type, Teams team);
-	void setPiece(int row, int col, PiecesTypes type, Teams team);
-	void setPiece(int position,		PiecesTypes type, Teams team);
 	void setPiece(Point point,		Piece* piece);
 
-	Point find(PiecesTypes type, Teams team);
+	Point find(Teams team, PiecesTypes type);
 
 	Piece* operator[](int index);
 	Piece* operator[](Point point);
 
 
+	Piece* pickUpPiece(int index);
+	Piece* pickUpPiece(Point point);
+
 	Piece* getOrDefault(int index,			Piece* defaultValue);
 	Piece* getOrDefault(Point point,		Piece* defaultValue);
+
+	bool isValidPoint(Point point) const;
 
 
 private:

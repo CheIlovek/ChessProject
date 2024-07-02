@@ -1,5 +1,7 @@
 #pragma once
-
+#include <iostream>
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h" // must be included
 
 // Координата для ориентирования на шахматной доске.
 struct Point {

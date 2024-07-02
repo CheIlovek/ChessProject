@@ -1,7 +1,9 @@
+#include "ChessGrid.h"
 #include <iostream>
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h" // must be included
-#include "ChessGrid.h"
+#include "Point.h"
+#include "Piece.h"
 #include "GameMode.h"
 
 
@@ -20,7 +22,7 @@ ChessGrid::ChessGrid(ChessGrid& other) {
 	chessGrid.resize(other.chessGrid.size());
 	for (int i = 0; i < chessGrid.size(); i++) {
 		if (!other.chessGrid[i]) continue;
-		chessGrid[i].reset(new Piece(*other.chessGrid[i]));
+		chessGrid[i] = Piece::getObjectByTypeAndTeam(other.chessGrid[i]->team, other.chessGrid[i]->type);
 	}
 	
 }
@@ -46,6 +48,28 @@ bool ChessGrid::movePiece(Point from, Point to) {
 	return movePiece(from.col + from.row * width, to.col + to.row * width);
 }
 
+Teams ChessGrid::getTeamOnSquareOrDefault(Point point, Teams defaultTeam) {
+	if (point.row < 0 || point.row >= height || point.col < 0 || point.col >= width) {
+		spdlog::warn("Attempt to access memory beyond grid. Row: {}, Column: {}, Size: {}", point.row, point.col, chessGrid.size());
+		return defaultTeam;
+	}
+	int index = point.row * width + point.col;
+	Piece* piece = chessGrid[index].get();
+	if (!piece) {
+		return defaultTeam;
+	}
+	return piece->team;
+}
+
+Teams ChessGrid::getTeamOnSquare(Point point) {
+	int index = point.row * width + point.col;
+	Piece* piece = chessGrid[index].get();
+	if (!piece) {
+		return Teams::ENEMY_TO_ALL;
+	}
+	return piece->team;
+}
+
 void ChessGrid::removePiece(Point point) {
 	removePiece(point.col + point.row * width);
 }
@@ -62,32 +86,6 @@ void ChessGrid::removePiece(int position) {
 	chessGrid[position].reset();
 }
 
-void ChessGrid::setPiece(Point point, PiecesTypes type, Teams team) {
-	if (point.row < 0 || point.row >= height || point.col < 0 || point.col >= width) {
-		spdlog::warn("Attempt to access memory beyond grid. Row: {}, Column: {}, Size: {}", point.row, point.col, chessGrid.size());
-		return;
-	}
-	int pos = point.col + point.row * width;
-	setPiece(pos, type, team);
-}
-
-void ChessGrid::setPiece(int row, int col, PiecesTypes type, Teams team) {
-	if (row < 0 || row >= height || col < 0 || col >= width) {
-		spdlog::warn("Attempt to access memory beyond grid. Row: {}, Column: {}, Size: {}", row, col, chessGrid.size());
-		return;
-	}
-	int pos = col + row * width;
-	setPiece(pos, type, team);
-}
-
-void ChessGrid::setPiece(int position, PiecesTypes type, Teams team) {
-	if (position < 0 || position >= chessGrid.size()) {
-		spdlog::warn("Attempt to access memory beyond grid. Position: {}, Size: {}", position, chessGrid.size());
-		return;
-	}
-	chessGrid[position].reset(new Piece(type, team));
-}
-
 void ChessGrid::setPiece(Point point, Piece* piece) {
 	int pos = point.col + point.row * width;
 	if (pos < 0 || pos >= chessGrid.size()) {
@@ -97,17 +95,16 @@ void ChessGrid::setPiece(Point point, Piece* piece) {
 	chessGrid[pos].reset(piece);
 }
 
-// »щет позицию фигуры по типу и команде, в случае неудачи - возвращает Point(-1,-1).
-Point ChessGrid::find(PiecesTypes type, Teams team) {
+Point ChessGrid::find(Teams team, PiecesTypes type) {
 	for (int i = 0; i < chessGrid.size(); i++) {
-		const Piece* piece = chessGrid[i].get();
-		if (!piece) continue;
-		if (piece->type == type && piece->team == team) {
-			return Point(i / width, i % width);
+		Piece* curPiece = chessGrid[i].get();
+		if (curPiece && curPiece->team == team && curPiece->type == type) {
+			return { (short) (i / width), (short) (i % width) };
 		}
 	}
-	return Point(-1, -1);
+	return { -1, -1 };
 }
+
 
 Piece* ChessGrid::operator[](int index) {
 	return chessGrid[index].get();
@@ -116,6 +113,20 @@ Piece* ChessGrid::operator[](int index) {
 Piece* ChessGrid::operator[](Point point) {
 	int index = point.row * width + point.col;
 	return chessGrid[index].get();
+}
+
+Piece* ChessGrid::pickUpPiece(Point point) {
+	if (point.row < 0 || point.row >= height || point.col < 0 || point.col >= width) {
+		return nullptr;
+	}
+	pickUpPiece(point.col + point.row * width);
+}
+
+Piece* ChessGrid::pickUpPiece(int index) {
+	if (index < 0 || index >= chessGrid.size()) {
+		return nullptr;
+	}
+	return chessGrid[index].release();
 }
 
 Piece* ChessGrid::getOrDefault(int index, Piece* defaultValue) {
@@ -132,6 +143,10 @@ Piece* ChessGrid::getOrDefault(Point point, Piece* defaultValue) {
 	}
 	int index = point.row * width + point.col;
 	return (*this)[index];
+}
+
+bool ChessGrid::isValidPoint(Point point) const {
+	return point.row >= 0 && point.row < height && point.col >= 0 && point.col < width;
 }
 
 

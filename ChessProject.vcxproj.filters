@@ -21,16 +21,13 @@
     <ClCompile Include="ChessboardEntity.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="PieceEntity.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="GameMode.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="ChessGrid.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="ChessPiece.cpp">
+    <ClCompile Include="Piece.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,16 +35,10 @@
     <ClInclude Include="ChessboardEntity.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="PieceEntity.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="GameMode.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="ChessGrid.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="ChessPiece.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="ChessEnums.h">
@@ -57,9 +48,6 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Piece.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="LogConversions.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
